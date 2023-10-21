@@ -13,15 +13,15 @@ import CryptoSwift
 @Model
 public final class Namespace {
     // Reference to world that namespace belongs to
-    var world: World?
+    public var world: World?
     
     // bytes14 namespace
-    var namespaceId: String
+    public var namespaceId: String
     
     @Relationship(deleteRule: .cascade, inverse: \Table.namespace)
-    var tables = [Table]()
+    public var tables = [Table]()
     
-    init(namespaceId: Bytes) {
+    public init(namespaceId: Bytes) {
         self.namespaceId = namespaceId.toHexString()
     }
 }

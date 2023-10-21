@@ -13,11 +13,11 @@ import CryptoSwift
 @Model
 public final class Table {
     // Reference to namespace that table belongs to
-    var namespace: Namespace?
+    public var namespace: Namespace?
     
-    var tableName: String
+    public var tableName: String
     
-    init(tableName: String) {
+    public init(tableName: String) {
         self.tableName = tableName
     }
 }
