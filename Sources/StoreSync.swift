@@ -72,7 +72,7 @@ public class StoreSync {
         }
     }
     
-    private func handleLog(chainId: UInt64, log: EthereumLogObject) {
+    private func handleLog(chainId: UInt, log: EthereumLogObject) {
         do {
             switch log.topics[0] {
             case StoreSync.storeSetRecordTopic:
@@ -95,7 +95,7 @@ public class StoreSync {
         }
     }
     
-    private func getChainId() async throws -> UInt64 {
+    private func getChainId() async throws -> UInt {
         let chainIdValue: EthereumQuantity? = try await withCheckedThrowingContinuation { continuation in
             let req = BasicRPCRequest(id: web3.properties.rpcId, jsonrpc: Web3.jsonrpc, method: "eth_chainId", params: [])
             web3.provider.send(request: req) { (resp: Web3Response<EthereumQuantity>) in
@@ -108,7 +108,9 @@ public class StoreSync {
         }
         
         
-        guard let hex = chainIdValue?.hex(), let chainId = UInt64(hexString: hex) else { throw StoreSyncError.chainIdNotFound }
+        guard let quantity = chainIdValue?.quantity else { throw StoreSyncError.chainIdNotFound }
+        let chainId = UInt(quantity)
+        
         return chainId
     }
 }

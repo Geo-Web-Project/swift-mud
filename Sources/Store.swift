@@ -74,7 +74,7 @@ public class Store {
         }
     }
     
-    func handleStoreSetRecordEvent(chainId: UInt64, worldAddress: EthereumAddress, event: [String: Any], blockNumber: EthereumQuantity) throws {
+    func handleStoreSetRecordEvent(chainId: UInt, worldAddress: EthereumAddress, event: [String: Any], blockNumber: EthereumQuantity) throws {
         guard let tableIdData = event["tableId"] as? Data else { throw StoreError.invalidTableId }
         let resourceId = ResourceId(bytes: tableIdData.makeBytes())
         guard resourceId.type == .table else { throw StoreError.invalidTableId }
@@ -93,7 +93,7 @@ public class Store {
         }
     }
     
-    func handleStoreSpliceStaticDataEvent(chainId: UInt64, worldAddress: EthereumAddress, event: [String: Any], blockNumber: EthereumQuantity) throws {
+    func handleStoreSpliceStaticDataEvent(chainId: UInt, worldAddress: EthereumAddress, event: [String: Any], blockNumber: EthereumQuantity) throws {
         guard let tableIdData = event["tableId"] as? Data else { throw StoreError.invalidTableId }
         let resourceId = ResourceId(bytes: tableIdData.makeBytes())
         guard resourceId.type == .table else { throw StoreError.invalidTableId }
@@ -112,7 +112,7 @@ public class Store {
         }
     }
     
-    func handleStoreSpliceDynamicDataEvent(chainId: UInt64, worldAddress: EthereumAddress, event: [String: Any], blockNumber: EthereumQuantity) throws {
+    func handleStoreSpliceDynamicDataEvent(chainId: UInt, worldAddress: EthereumAddress, event: [String: Any], blockNumber: EthereumQuantity) throws {
         guard let tableIdData = event["tableId"] as? Data else { throw StoreError.invalidTableId }
         let resourceId = ResourceId(bytes: tableIdData.makeBytes())
         guard resourceId.type == .table else { throw StoreError.invalidTableId }
@@ -131,7 +131,7 @@ public class Store {
         }
     }
     
-    func handleStoreDeleteRecordEvent(chainId: UInt64, worldAddress: EthereumAddress, event: [String: Any], blockNumber: EthereumQuantity) throws {
+    func handleStoreDeleteRecordEvent(chainId: UInt, worldAddress: EthereumAddress, event: [String: Any], blockNumber: EthereumQuantity) throws {
         guard let tableIdData = event["tableId"] as? Data else { throw StoreError.invalidTableId }
         let resourceId = ResourceId(bytes: tableIdData.makeBytes())
         guard resourceId.type == .table else { throw StoreError.invalidTableId }
@@ -151,7 +151,7 @@ public class Store {
     }
     
     
-    private func getOrCreateWorld(chainId: UInt64, worldAddress: EthereumAddress, blockNumber: EthereumQuantity) throws -> World {
+    private func getOrCreateWorld(chainId: UInt, worldAddress: EthereumAddress, blockNumber: EthereumQuantity) throws -> World {
         let addressStr = worldAddress.hex(eip55: true)
         let worldPredicate = FetchDescriptor<World>(
             predicate: #Predicate { $0.chainId == chainId && $0.worldAddress == addressStr }

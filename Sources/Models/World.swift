@@ -11,7 +11,7 @@ import CryptoSwift
 
 @Model
 public final class World {
-    public var chainId: UInt64
+    public var chainId: UInt
     public var worldAddress: String
     public var lastSyncedBlock: UInt
     
@@ -21,7 +21,7 @@ public final class World {
     @Relationship(deleteRule: .cascade, inverse: \Namespace.world)
     public var namespaces = [Namespace]()
     
-    public init(chainId: UInt64, worldAddress: EthereumAddress, lastSyncedBlock: UInt) {
+    public init(chainId: UInt, worldAddress: EthereumAddress, lastSyncedBlock: UInt) {
         self.chainId = chainId
         self.worldAddress = worldAddress.hex(eip55: true)
         self.lastSyncedBlock = lastSyncedBlock
