@@ -16,23 +16,23 @@ public enum ResourceType: String {
 }
 
 public struct ResourceId {
-    let bytes: Bytes
+    public let bytes: Bytes
     
-    var type: ResourceType {
+    public var type: ResourceType {
         ResourceType(rawValue: Array(bytes[0..<2]).makeString())!
     }
-    var namespace: Bytes {
+    public var namespace: Bytes {
         Array(bytes[2..<16])
     }
-    var name: String {
+    public var name: String {
         Array(bytes[16..<32]).makeString()
     }
     
-    init(bytes: Bytes) {
+    public init(bytes: Bytes) {
         self.bytes = bytes
     }
     
-    init(type: ResourceType, namespace: Bytes, name: String) {
+    public init(type: ResourceType, namespace: Bytes, name: String) {
         var namespaceBytes = namespace
         var nameBytes = name.makeBytes()
         if namespaceBytes.count < 14 {
