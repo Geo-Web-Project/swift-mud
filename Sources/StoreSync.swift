@@ -24,13 +24,13 @@ public class StoreSync {
     private static let storeDeleteRecordTopic = try! EthereumData.string(ABI.encodeEventSignature(Store.StoreDeleteRecord))
     private static let allStoreTopics = [storeSetRecordTopic, storeSpliceStaticDataTopic, storeSpliceDynamicDataTopic, storeDeleteRecordTopic]
 
-    init(modelContext: ModelContext, web3: Web3, store: Store) {
+    public init(modelContext: ModelContext, web3: Web3, store: Store) {
         self.modelContext = modelContext
         self.web3 = web3
         self.store = store
     }
     
-    func syncLogs(worldAddress: EthereumAddress, namespace: Bytes) async throws {
+    public func syncLogs(worldAddress: EthereumAddress, namespace: Bytes) async throws {
         let addressStr = worldAddress.hex(eip55: true)
         let lastBlockFetch = FetchDescriptor<World>(
             predicate: #Predicate { $0.worldAddress == addressStr }
@@ -61,7 +61,7 @@ public class StoreSync {
         }
     }
     
-    func subscribeToLogs(worldAddress: EthereumAddress, namespace: Bytes) async throws {
+    public func subscribeToLogs(worldAddress: EthereumAddress, namespace: Bytes) async throws {
         let chainId = try await getChainId()
         let tableIds = self.store.getRegisteredTableIds(namespace: namespace).map{ EthereumData($0.bytes) }
 

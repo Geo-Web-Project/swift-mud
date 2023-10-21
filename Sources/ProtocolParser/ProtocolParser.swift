@@ -10,7 +10,7 @@ import Web3
 import Web3ContractABI
 
 public class ProtocolParser {
-    enum ParserError: Error {
+    public enum ParserError: Error {
         case invalidStaticType
         case invalidDynamicType
         case invalidDataLength
@@ -18,7 +18,7 @@ public class ProtocolParser {
         case packedCounterLengthMismatchError
     }
     
-    static func decodeStaticField(abiType: SolidityType, data: Bytes) throws -> Any? {
+    public static func decodeStaticField(abiType: SolidityType, data: Bytes) throws -> Any? {
         switch abiType {
         case .type(.int(let bits)):
             switch bits {
@@ -57,7 +57,7 @@ public class ProtocolParser {
         }
     }
     
-    static func decodeDynamicField(abiType: SolidityType, data: Bytes) throws -> Any? {
+    public static func decodeDynamicField(abiType: SolidityType, data: Bytes) throws -> Any? {
         switch abiType {
         case .type(.bytes(_)):
             return Data(hexString: data.toHexString(), length: UInt(data.count))
@@ -78,7 +78,7 @@ public class ProtocolParser {
         }
     }
     
-    static func hexToPackedCounter(data: Bytes) throws -> (UInt64, [UInt64]) {
+    public static func hexToPackedCounter(data: Bytes) throws -> (UInt64, [UInt64]) {
         guard data.count == 32 else { throw ParserError.invalidPackedCounter }
     
         guard let totalByteLength = try decodeStaticField(abiType: .uint56, data: Array(data[(32-7)...])) as? UInt64 else { throw ParserError.invalidPackedCounter }

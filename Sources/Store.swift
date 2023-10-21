@@ -60,11 +60,11 @@ public class Store {
     let modelContext: ModelContext
     var eventHandlers: [String: Record.Type] = [:]
     
-    init(modelContext: ModelContext) {
+    public init(modelContext: ModelContext) {
         self.modelContext = modelContext
     }
     
-    func registerRecordType(tableName: String, handler: Record.Type) {
+    public func registerRecordType(tableName: String, handler: Record.Type) {
         eventHandlers[tableName] = handler
     }
     
