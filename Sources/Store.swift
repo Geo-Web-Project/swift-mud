@@ -10,7 +10,7 @@ import Web3ContractABI
 import SwiftData
 import Foundation
 
-class Store {
+public class Store {
     enum StoreError: Error {
         case invalidTableId
         case unknownTableId

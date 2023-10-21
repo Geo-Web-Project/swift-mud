@@ -11,7 +11,7 @@ import Web3
 import CryptoSwift
 
 @Model
-final class Table {
+public final class Table {
     // Reference to namespace that table belongs to
     var namespace: Namespace?
     

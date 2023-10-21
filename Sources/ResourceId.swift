@@ -7,7 +7,7 @@
 
 import Web3
 
-enum ResourceType: String {
+public enum ResourceType: String {
     case table = "tb"
     case offchaintable = "ot"
     case namespace = "ns"
@@ -15,7 +15,7 @@ enum ResourceType: String {
     case system = "sy"
 }
 
-struct ResourceId {
+public struct ResourceId {
     let bytes: Bytes
     
     var type: ResourceType {

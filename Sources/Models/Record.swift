@@ -11,13 +11,13 @@ import Web3
 import Web3ContractABI
 import Foundation
 
-enum SetRecordError: Error {
+public enum SetRecordError: Error {
     case invalidData
     case invalidNativeType
     case invalidNativeValue
 }
 
-protocol Record {
+public protocol Record {
     var table: Table? { get set }
     var uniqueKey: String { get }
     
@@ -26,11 +26,3 @@ protocol Record {
     static func spliceDynamicData(modelContext: ModelContext, table: Table, values: [String: Any], blockNumber: EthereumQuantity) throws
     static func deleteRecord(modelContext: ModelContext, table: Table, values: [String: Any], blockNumber: EthereumQuantity) throws
 }
-
-//@Model
-//class Record {
-//    // Reference to table that record belongs to
-//    var table: Table?
-//        
-//    init() {}
-//}

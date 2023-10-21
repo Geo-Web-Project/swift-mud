@@ -9,7 +9,7 @@ import Foundation
 import Web3
 import Web3ContractABI
 
-class ProtocolParser {
+public class ProtocolParser {
     enum ParserError: Error {
         case invalidStaticType
         case invalidDynamicType

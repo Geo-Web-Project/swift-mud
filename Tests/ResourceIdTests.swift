@@ -7,7 +7,7 @@
 
 import XCTest
 import Web3
-@testable import swift_mud
+@testable import SwiftMUD
 
 final class ResourceIdTests: XCTestCase {
     func testHexToResourceId() throws {

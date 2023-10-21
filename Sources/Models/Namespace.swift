@@ -11,7 +11,7 @@ import Web3
 import CryptoSwift
 
 @Model
-final class Namespace {
+public final class Namespace {
     // Reference to world that namespace belongs to
     var world: World?
     

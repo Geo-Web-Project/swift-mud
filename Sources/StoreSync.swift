@@ -10,7 +10,7 @@ import SwiftData
 import Web3
 import Web3ContractABI
 
-class StoreSync {
+public class StoreSync {
     enum StoreSyncError: Error {
         case chainIdNotFound
     }

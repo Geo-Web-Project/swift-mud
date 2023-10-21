@@ -10,7 +10,7 @@ import Web3
 import CryptoSwift
 
 @Model
-final class World {
+public final class World {
     var chainId: UInt64
     var worldAddress: String
     var lastSyncedBlock: UInt

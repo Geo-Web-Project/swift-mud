@@ -3,7 +3,7 @@ import SwiftData
 import Web3
 import Web3ContractABI
 import CryptoSwift
-@testable import swift_mud
+@testable import SwiftMUD
 
 @Model
 class TestRecord: Record {

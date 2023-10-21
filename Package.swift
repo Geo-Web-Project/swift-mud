@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "swift-mud",
+    name: "SwiftMUD",
     platforms: [
         .iOS(.v17),
         .macOS(.v14)
@@ -12,8 +12,8 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "swift-mud",
-            targets: ["swift-mud"]),
+            name: "SwiftMUD",
+            targets: ["SwiftMUD"]),
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/Web3.swift", .upToNextMajor(from: "0.8.4")),
@@ -22,13 +22,13 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "swift-mud",
+            name: "SwiftMUD",
             dependencies: [
                 .product(name: "Web3", package: "Web3.swift"),
                 .product(name: "Web3ContractABI", package: "Web3.swift")
             ]),
         .testTarget(
-            name: "swift-mudTests",
-            dependencies: ["swift-mud"]),
+            name: "SwiftMUDTests",
+            dependencies: ["SwiftMUD"]),
     ]
 )
