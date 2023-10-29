@@ -77,16 +77,16 @@ public class StoreSync {
             switch log.topics[0] {
             case StoreSync.storeSetRecordTopic:
                 let event = try ABIDecoder.decodeEvent(Store.StoreSetRecord, from: log)
-                try self.store.handleStoreSetRecordEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber!)
+                try self.store.handleStoreSetRecordEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber ?? EthereumQuantity(quantity: 0))
             case StoreSync.storeSpliceStaticDataTopic:
                 let event = try ABIDecoder.decodeEvent(Store.StoreSpliceStaticData, from: log)
-                try self.store.handleStoreSpliceStaticDataEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber!)
+                try self.store.handleStoreSpliceStaticDataEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber ?? EthereumQuantity(quantity: 0))
             case StoreSync.storeSpliceDynamicDataTopic:
                 let event = try ABIDecoder.decodeEvent(Store.StoreSpliceDynamicData, from: log)
-                try self.store.handleStoreSpliceDynamicDataEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber!)
+                try self.store.handleStoreSpliceDynamicDataEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber ?? EthereumQuantity(quantity: 0))
             case StoreSync.storeDeleteRecordTopic:
                 let event = try ABIDecoder.decodeEvent(Store.StoreDeleteRecord, from: log)
-                try self.store.handleStoreDeleteRecordEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber!)
+                try self.store.handleStoreDeleteRecordEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber ?? EthereumQuantity(quantity: 0))
             default:
                 return
             }
