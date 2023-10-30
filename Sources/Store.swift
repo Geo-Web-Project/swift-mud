@@ -20,9 +20,9 @@ public class Store {
         let inputs: [SolidityEvent.Parameter] = [
             SolidityEvent.Parameter(name: "tableId", type: .bytes(length: 32), indexed: true),
             SolidityEvent.Parameter(name: "keyTuple", type: .array(type: .bytes(length: 32), length: nil), indexed: false),
-            SolidityEvent.Parameter(name: "staticData", type: .bytes(length: nil), indexed: false),
+            SolidityEvent.Parameter(name: "staticData", type: .bytes(length: 64), indexed: false),
             SolidityEvent.Parameter(name: "encodedLengths", type: .bytes(length: 32), indexed: false),
-            SolidityEvent.Parameter(name: "dynamicData", type: .bytes(length: nil), indexed: false),
+            SolidityEvent.Parameter(name: "dynamicData", type: .bytes(length: 64), indexed: false),
         ]
         return SolidityEvent(name: "Store_SetRecord", anonymous: false, inputs: inputs)
     }
@@ -32,7 +32,7 @@ public class Store {
             SolidityEvent.Parameter(name: "tableId", type: .bytes(length: 32), indexed: true),
             SolidityEvent.Parameter(name: "keyTuple", type: .array(type: .bytes(length: 32), length: nil), indexed: false),
             SolidityEvent.Parameter(name: "start", type: .uint48, indexed: false),
-            SolidityEvent.Parameter(name: "data", type: .bytes(length: nil), indexed: false),
+            SolidityEvent.Parameter(name: "data", type: .bytes(length: 64), indexed: false),
         ]
         return SolidityEvent(name: "Store_SpliceStaticData", anonymous: false, inputs: inputs)
     }
@@ -44,7 +44,7 @@ public class Store {
             SolidityEvent.Parameter(name: "start", type: .uint48, indexed: false),
             SolidityEvent.Parameter(name: "deleteCount", type: .uint40, indexed: false),
             SolidityEvent.Parameter(name: "encodedLengths", type: .bytes(length: 32), indexed: false),
-            SolidityEvent.Parameter(name: "data", type: .bytes(length: nil), indexed: false),
+            SolidityEvent.Parameter(name: "data", type: .bytes(length: 64), indexed: false),
         ]
         return SolidityEvent(name: "Store_SpliceDynamicData", anonymous: false, inputs: inputs)
     }
