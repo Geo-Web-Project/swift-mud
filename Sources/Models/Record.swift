@@ -21,8 +21,8 @@ public protocol Record {
     var table: Table? { get set }
     var uniqueKey: String { get }
     
-    static func setRecord(modelContext: ModelContext, table: Table, values: [String: Any], blockNumber: EthereumQuantity) throws
-    static func spliceStaticData(modelContext: ModelContext, table: Table, values: [String: Any], blockNumber: EthereumQuantity) throws
-    static func spliceDynamicData(modelContext: ModelContext, table: Table, values: [String: Any], blockNumber: EthereumQuantity) throws
-    static func deleteRecord(modelContext: ModelContext, table: Table, values: [String: Any], blockNumber: EthereumQuantity) throws
+    static func setRecord(storeActor: StoreActor, table: Table, values: [String: Any], blockNumber: EthereumQuantity) async throws
+    static func spliceStaticData(storeActor: StoreActor, table: Table, values: [String: Any], blockNumber: EthereumQuantity) async throws
+    static func spliceDynamicData(storeActor: StoreActor, table: Table, values: [String: Any], blockNumber: EthereumQuantity) async throws
+    static func deleteRecord(storeActor: StoreActor, table: Table, values: [String: Any], blockNumber: EthereumQuantity) async throws
 }

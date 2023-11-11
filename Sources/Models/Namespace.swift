@@ -25,3 +25,23 @@ public final class Namespace {
         self.namespaceId = namespaceId.toHexString()
     }
 }
+
+extension StoreActor {
+    public func getOrCreateNamespace(resourceId: ResourceId, world: World) throws -> Namespace {
+        let namespace = world.namespaces.first(where: { namespace in
+            namespace.namespaceId == resourceId.namespace.toHexString()
+        })
+        
+        if let namespace {
+            return namespace
+        } else {
+            let newNamespace = Namespace(namespaceId: resourceId.namespace)
+            modelContext.insert(newNamespace)
+            world.namespaces.append(newNamespace)
+            
+            try modelContext.save()
+            
+            return newNamespace
+        }
+    }
+}

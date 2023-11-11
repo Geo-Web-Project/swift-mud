@@ -21,3 +21,23 @@ public final class Table {
         self.tableName = tableName
     }
 }
+
+extension StoreActor {
+    public func getOrCreateTable(resourceId: ResourceId, namespace: Namespace) throws -> Table {
+        let table = namespace.tables.first(where: { table in
+            table.tableName == resourceId.name
+        })
+        
+        if let table {
+            return table
+        } else {
+            let newTable = Table(tableName: resourceId.name)
+            modelContext.insert(newTable)
+            namespace.tables.append(newTable)
+            
+            try modelContext.save()
+            
+            return newTable
+        }
+    }
+}

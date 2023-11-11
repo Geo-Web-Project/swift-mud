@@ -1,6 +1,6 @@
 //
 //  ResourceId.swift
-//  MUDTesting
+//  swift-mud
 //
 //  Created by codynhat on 2023-08-03.
 //

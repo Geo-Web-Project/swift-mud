@@ -20,7 +20,7 @@ class TestRecord: Record {
         self.value = value
     }
     
-    static func setRecord(modelContext: ModelContext, table: Table, values: [String : Any], blockNumber: EthereumQuantity) throws {
+    static func setRecord(storeActor: StoreActor, table: Table, values: [String : Any], blockNumber: EthereumQuantity) async throws {
         guard let keys = values["keyTuple"] as? [Data] else { throw SetRecordError.invalidData }
         guard let key = try ProtocolParser.decodeStaticField(abiType: SolidityType.bytes(length: 32), data: keys[0].makeBytes()) as? Data else { throw SetRecordError.invalidNativeValue }
         
@@ -30,6 +30,24 @@ class TestRecord: Record {
         let digest: Array<UInt8> = Array(table.namespace!.world!.uniqueKey.hexToBytes() + table.namespace!.namespaceId.hexToBytes() + table.tableName.makeBytes() + key.makeBytes())
         let uniqueKey = SHA3(variant: .keccak256).calculate(for: digest).toHexString()
         
+        try await storeActor.upsertTestRecord(uniqueKey: uniqueKey, key: key, value: value, table: table)
+    }
+    
+    static func spliceStaticData(storeActor: StoreActor, table: Table, values: [String : Any], blockNumber: EthereumQuantity) async throws {
+        
+    }
+    
+    static func spliceDynamicData(storeActor: StoreActor, table: Table, values: [String : Any], blockNumber: EthereumQuantity) async throws {
+        
+    }
+    
+    static func deleteRecord(storeActor: StoreActor, table: Table, values: [String : Any], blockNumber: EthereumQuantity) async throws {
+        
+    }
+}
+
+extension StoreActor {
+    func upsertTestRecord(uniqueKey: String, key: Data, value: UInt8, table: Table) async throws {
         let latestValue = FetchDescriptor<TestRecord>(
             predicate: #Predicate { $0.uniqueKey == uniqueKey }
         )
@@ -41,25 +59,14 @@ class TestRecord: Record {
             let record = TestRecord(uniqueKey: uniqueKey, key: key, value: value)
             record.table = table
             modelContext.insert(record)
+            
+            try modelContext.save()
         }
-    }
-    
-    static func spliceStaticData(modelContext: ModelContext, table: Table, values: [String : Any], blockNumber: EthereumQuantity) throws {
-        
-    }
-    
-    static func spliceDynamicData(modelContext: ModelContext, table: Table, values: [String : Any], blockNumber: EthereumQuantity) throws {
-        
-    }
-    
-    static func deleteRecord(modelContext: ModelContext, table: Table, values: [String : Any], blockNumber: EthereumQuantity) throws {
-        
     }
 }
 
 final class StoreTests: XCTestCase {
     var store: Store?
-    var modelContext: ModelContext?
     
     let basicEvent: [String : Any] = [
         "tableId": Data(hex: "0x746200000000000000000000000000014f7269656e746174696f6e436f6d0000"),
@@ -79,23 +86,23 @@ final class StoreTests: XCTestCase {
             XCTFail("Failed to set up model container")
             return
         }
-        modelContext = ModelContext(container)
-        store = Store(modelContext: modelContext!)
+        let storeActor = StoreActor(modelContainer: container)
+        store = Store(storeActor: storeActor)
         store?.registerRecordType(tableName: "OrientationCom", handler: TestRecord.self)
     }
     
     func testResourcesDoNotExist() async throws {
-        XCTAssertNoThrow(
-            try store!.handleStoreSetRecordEvent(
-                chainId: 420,
-                worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
-                event: basicEvent,
-                blockNumber: EthereumQuantity(integerLiteral: 1)
-            )
+        let res: ()? = try? await store!.handleStoreSetRecordEvent(
+            chainId: 420,
+            worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
+            event: basicEvent,
+            blockNumber: EthereumQuantity(integerLiteral: 1)
         )
         
-        try modelContext?.save()
-                
+        XCTAssertNotNil(res)
+                        
+        let modelContext = store?.storeActor.modelExecutor.modelContext
+        
         let worlds = try modelContext!.fetch(FetchDescriptor<World>())
         XCTAssertEqual(worlds.count, 1)
         XCTAssertEqual(worlds.first?.chainId, 420)
@@ -119,23 +126,23 @@ final class StoreTests: XCTestCase {
     }
     
     func testResourcesExists() async throws {
-        try store!.handleStoreSetRecordEvent(
+        try await store!.handleStoreSetRecordEvent(
+            chainId: 420,
+            worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
+            event: basicEvent,
+            blockNumber: EthereumQuantity(integerLiteral: 1)
+        )
+        
+        let res: ()? = try? await store!.handleStoreSetRecordEvent(
             chainId: 420,
             worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
             event: basicEvent,
             blockNumber: EthereumQuantity(integerLiteral: 1)
         )
                 
-        XCTAssertNoThrow(
-            try store!.handleStoreSetRecordEvent(
-                chainId: 420,
-                worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
-                event: basicEvent,
-                blockNumber: EthereumQuantity(integerLiteral: 1)
-            )
-        )
+        XCTAssertNotNil(res)
         
-        try modelContext?.save()
+        let modelContext = store?.storeActor.modelExecutor.modelContext
         
         let worlds = try modelContext!.fetch(FetchDescriptor<World>())
         XCTAssertEqual(worlds.count, 1)
@@ -160,34 +167,31 @@ final class StoreTests: XCTestCase {
     }
     
     func testMultipleWorlds() async throws {
-        XCTAssertNoThrow(
-            try store!.handleStoreSetRecordEvent(
-                chainId: 420,
-                worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
-                event: basicEvent,
-                blockNumber: EthereumQuantity(integerLiteral: 1)
-            )
+        let r1: ()? = try? await store!.handleStoreSetRecordEvent(
+            chainId: 420,
+            worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
+            event: basicEvent,
+            blockNumber: EthereumQuantity(integerLiteral: 1)
         )
+        XCTAssertNotNil(r1)
                 
-        XCTAssertNoThrow(
-            try store!.handleStoreSetRecordEvent(
-                chainId: 1,
-                worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
-                event: basicEvent,
-                blockNumber: EthereumQuantity(integerLiteral: 1)
-            )
+        let r2: ()? = try? await store!.handleStoreSetRecordEvent(
+            chainId: 1,
+            worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
+            event: basicEvent,
+            blockNumber: EthereumQuantity(integerLiteral: 1)
         )
+        XCTAssertNotNil(r2)
         
-        XCTAssertNoThrow(
-            try store!.handleStoreSetRecordEvent(
-                chainId: 1,
-                worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c6")!,
-                event: basicEvent,
-                blockNumber: EthereumQuantity(integerLiteral: 1)
-            )
+        let r3: ()? = try? await store!.handleStoreSetRecordEvent(
+            chainId: 1,
+            worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c6")!,
+            event: basicEvent,
+            blockNumber: EthereumQuantity(integerLiteral: 1)
         )
+        XCTAssertNotNil(r3)
         
-        try modelContext?.save()
+        let modelContext = store?.storeActor.modelExecutor.modelContext
         
         let worlds = try modelContext!.fetch(FetchDescriptor<World>())
         XCTAssertEqual(worlds.count, 3)
@@ -203,26 +207,24 @@ final class StoreTests: XCTestCase {
     }
     
     func testMultipleNamespaces() async throws {
-        XCTAssertNoThrow(
-            try store!.handleStoreSetRecordEvent(
-                chainId: 420,
-                worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
-                event: basicEvent,
-                blockNumber: EthereumQuantity(integerLiteral: 1)
-            )
+        let r1: ()? = try? await  store!.handleStoreSetRecordEvent(
+            chainId: 420,
+            worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
+            event: basicEvent,
+            blockNumber: EthereumQuantity(integerLiteral: 1)
         )
+        XCTAssertNotNil(r1)
                 
-        XCTAssertNoThrow(
-            try store!.handleStoreSetRecordEvent(
-                chainId: 420,
-                worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
-                event: basicEvent(tableId: Data(hex: "0x746200000000000000000000000000114f7269656e746174696f6e436f6d0000")), // Different namespace
-                blockNumber: EthereumQuantity(integerLiteral: 1)
-            )
+        let r2: ()? = try? await store!.handleStoreSetRecordEvent(
+            chainId: 420,
+            worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
+            event: basicEvent(tableId: Data(hex: "0x746200000000000000000000000000114f7269656e746174696f6e436f6d0000")), // Different namespace
+            blockNumber: EthereumQuantity(integerLiteral: 1)
         )
+        XCTAssertNotNil(r2)
         
-        try modelContext?.save()
-        
+        let modelContext = store?.storeActor.modelExecutor.modelContext
+
         let worlds = try modelContext!.fetch(FetchDescriptor<World>())
         XCTAssertEqual(worlds.count, 1)
         
@@ -237,26 +239,24 @@ final class StoreTests: XCTestCase {
     }
     
     func testMultipleTables() async throws {
-        XCTAssertNoThrow(
-            try store!.handleStoreSetRecordEvent(
-                chainId: 420,
-                worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
-                event: basicEvent,
-                blockNumber: EthereumQuantity(integerLiteral: 1)
-            )
+        let r1: ()? = try? await store!.handleStoreSetRecordEvent(
+            chainId: 420,
+            worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
+            event: basicEvent,
+            blockNumber: EthereumQuantity(integerLiteral: 1)
         )
+        XCTAssertNotNil(r1)
                 
-        XCTAssertNoThrow(
-            try store!.handleStoreSetRecordEvent(
-                chainId: 420,
-                worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
-                event: basicEvent(tableId: Data(hex: "0x746200000000000000000000000000015363616c65436f6d0000000000000000")), // Different table
-                blockNumber: EthereumQuantity(integerLiteral: 1)
-            )
+        let r2: ()? = try? await store!.handleStoreSetRecordEvent(
+            chainId: 420,
+            worldAddress: EthereumAddress(hexString: "0xfF5Be16460704eFd0263dB1444Eaa216b77477c5")!,
+            event: basicEvent(tableId: Data(hex: "0x746200000000000000000000000000015363616c65436f6d0000000000000000")), // Different table
+            blockNumber: EthereumQuantity(integerLiteral: 1)
         )
+        XCTAssertNotNil(r2)
         
-        try modelContext?.save()
-        
+        let modelContext = store?.storeActor.modelExecutor.modelContext
+
         let worlds = try modelContext!.fetch(FetchDescriptor<World>())
         XCTAssertEqual(worlds.count, 1)
         

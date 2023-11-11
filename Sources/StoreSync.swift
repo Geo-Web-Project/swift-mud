@@ -15,7 +15,6 @@ public class StoreSync {
         case chainIdNotFound
     }
     
-    private let modelContext: ModelContext
     private let web3: Web3
     private let store: Store
     private static let storeSetRecordTopic = try! EthereumData.string(ABI.encodeEventSignature(Store.StoreSetRecord))
@@ -24,19 +23,13 @@ public class StoreSync {
     private static let storeDeleteRecordTopic = try! EthereumData.string(ABI.encodeEventSignature(Store.StoreDeleteRecord))
     private static let allStoreTopics = [storeSetRecordTopic, storeSpliceStaticDataTopic, storeSpliceDynamicDataTopic, storeDeleteRecordTopic]
 
-    public init(modelContext: ModelContext, web3: Web3, store: Store) {
-        self.modelContext = modelContext
+    public init(web3: Web3, store: Store) {
         self.web3 = web3
         self.store = store
     }
     
     public func syncLogs(worldAddress: EthereumAddress, namespace: Bytes) async throws {
-        let addressStr = worldAddress.hex(eip55: true)
-        let lastBlockFetch = FetchDescriptor<World>(
-            predicate: #Predicate { $0.worldAddress == addressStr }
-        )
-        let results = try modelContext.fetch(lastBlockFetch)
-        let lastSyncedBlock = results.count > 0 ? results[0].lastSyncedBlock : nil
+        let lastSyncedBlock = try await store.storeActor.fetchLastSyncedBlock(worldAddress: worldAddress)
         var fromBlock: EthereumQuantityTag = .earliest
         if let lastSyncedBlock {
             fromBlock = .block(BigUInt(lastSyncedBlock))
@@ -45,48 +38,50 @@ public class StoreSync {
         let chainId = try await getChainId()
         let tableIds = self.store.getRegisteredTableIds(namespace: namespace).map{ EthereumData($0.bytes) }
         
-        return try await withCheckedThrowingContinuation { continuation in
+        let logs: [EthereumLogObject] = try await withCheckedThrowingContinuation { continuation in
             web3.eth.getLogs(addresses: [worldAddress], topics: [StoreSync.allStoreTopics, tableIds], fromBlock: fromBlock, toBlock: .latest, response: { resp in
                 if let error = resp.error {
                     return continuation.resume(throwing: error)
                 }
-                guard let logs = resp.result else { return continuation.resume() }
+                guard let logs = resp.result else { return continuation.resume(returning: []) }
                 
-                for log in logs {
-                    self.handleLog(chainId: chainId, log: log)
-                }
-                
-                return continuation.resume()
+                return continuation.resume(returning: logs)
             })
+        }
+        
+        for log in logs {
+            await self.handleLog(chainId: chainId, log: log)
         }
     }
     
     public func subscribeToLogs(worldAddress: EthereumAddress, namespace: Bytes) async throws {
         let chainId = try await getChainId()
         let tableIds = self.store.getRegisteredTableIds(namespace: namespace).map{ EthereumData($0.bytes) }
-
+        
         try web3.eth.subscribeToLogs(addresses: [worldAddress], topics: [StoreSync.allStoreTopics, tableIds]) {_ in } onEvent: { resp in
             if let res = resp.result {
-                self.handleLog(chainId: chainId, log: res)
+                Task.detached {
+                    await self.handleLog(chainId: chainId, log: res)
+                }
             }
         }
     }
     
-    public func handleLog(chainId: UInt, log: EthereumLogObject) {
+    public func handleLog(chainId: UInt, log: EthereumLogObject) async {
         do {
             switch log.topics[0] {
             case StoreSync.storeSetRecordTopic:
                 let event = try ABIDecoder.decodeEvent(Store.StoreSetRecord, from: log)
-                try self.store.handleStoreSetRecordEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber ?? EthereumQuantity(quantity: 0))
+                try await self.store.handleStoreSetRecordEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber ?? EthereumQuantity(quantity: 0))
             case StoreSync.storeSpliceStaticDataTopic:
                 let event = try ABIDecoder.decodeEvent(Store.StoreSpliceStaticData, from: log)
-                try self.store.handleStoreSpliceStaticDataEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber ?? EthereumQuantity(quantity: 0))
+                try await self.store.handleStoreSpliceStaticDataEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber ?? EthereumQuantity(quantity: 0))
             case StoreSync.storeSpliceDynamicDataTopic:
                 let event = try ABIDecoder.decodeEvent(Store.StoreSpliceDynamicData, from: log)
-                try self.store.handleStoreSpliceDynamicDataEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber ?? EthereumQuantity(quantity: 0))
+                try await self.store.handleStoreSpliceDynamicDataEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber ?? EthereumQuantity(quantity: 0))
             case StoreSync.storeDeleteRecordTopic:
                 let event = try ABIDecoder.decodeEvent(Store.StoreDeleteRecord, from: log)
-                try self.store.handleStoreDeleteRecordEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber ?? EthereumQuantity(quantity: 0))
+                try await self.store.handleStoreDeleteRecordEvent(chainId: chainId, worldAddress: log.address, event: event, blockNumber: log.blockNumber ?? EthereumQuantity(quantity: 0))
             default:
                 return
             }
