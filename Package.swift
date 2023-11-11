@@ -16,7 +16,7 @@ let package = Package(
             targets: ["SwiftMUD"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/Geo-Web-Project/Web3.swift", revision: "6489d1e8b8a27a0f19f815756c4c8b510589b4fc"),
+        .package(url: "https://github.com/Geo-Web-Project/Web3.swift", branch: "master"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
