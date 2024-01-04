@@ -17,11 +17,11 @@ public final class Namespace {
     
     // bytes14 namespace
     public var namespaceId: String
-    
-    public var lastSyncedBlock: UInt
-    
+        
     @Relationship(deleteRule: .cascade, inverse: \Table.namespace)
     public var tables = [Table]()
+    
+    public var lastSyncedBlock: UInt?
     
     public init(namespaceId: Bytes, lastSyncedBlock: UInt) {
         self.namespaceId = namespaceId.toHexString()
