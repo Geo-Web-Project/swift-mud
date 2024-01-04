@@ -29,7 +29,7 @@ public class StoreSync {
     }
     
     public func syncLogs(worldAddress: EthereumAddress, namespace: Bytes) async throws {
-        let lastSyncedBlock = try await store.storeActor.fetchLastSyncedBlock(worldAddress: worldAddress)
+        let lastSyncedBlock = try await store.storeActor.fetchLastSyncedBlockForNamespace(namespaceId: namespace.toHexString())
         var fromBlock: EthereumQuantityTag = .earliest
         if let lastSyncedBlock {
             fromBlock = .block(BigUInt(lastSyncedBlock))

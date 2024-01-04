@@ -83,7 +83,7 @@ public class Store {
         let world = try await storeActor.getOrCreateWorld(chainId: chainId, worldAddress: worldAddress, blockNumber: blockNumber)
         
         // Create Namespace if does not exist
-        let namespace = try await storeActor.getOrCreateNamespace(resourceId: resourceId, world: world)
+        let namespace = try await storeActor.getOrCreateNamespace(resourceId: resourceId, world: world, blockNumber: blockNumber)
         
         // Create Table if does not exist
         let table = try await storeActor.getOrCreateTable(resourceId: resourceId, namespace: namespace)
@@ -102,7 +102,7 @@ public class Store {
         let world = try await storeActor.getOrCreateWorld(chainId: chainId, worldAddress: worldAddress, blockNumber: blockNumber)
         
         // Create Namespace if does not exist
-        let namespace = try await storeActor.getOrCreateNamespace(resourceId: resourceId, world: world)
+        let namespace = try await storeActor.getOrCreateNamespace(resourceId: resourceId, world: world, blockNumber: blockNumber)
         
         // Create Table if does not exist
         let table = try await storeActor.getOrCreateTable(resourceId: resourceId, namespace: namespace)
@@ -121,7 +121,7 @@ public class Store {
         let world = try await storeActor.getOrCreateWorld(chainId: chainId, worldAddress: worldAddress, blockNumber: blockNumber)
         
         // Create Namespace if does not exist
-        let namespace = try await storeActor.getOrCreateNamespace(resourceId: resourceId, world: world)
+        let namespace = try await storeActor.getOrCreateNamespace(resourceId: resourceId, world: world, blockNumber: blockNumber)
         
         // Create Table if does not exist
         let table = try await storeActor.getOrCreateTable(resourceId: resourceId, namespace: namespace)
@@ -140,7 +140,7 @@ public class Store {
         let world = try await storeActor.getOrCreateWorld(chainId: chainId, worldAddress: worldAddress, blockNumber: blockNumber)
         
         // Create Namespace if does not exist
-        let namespace = try await storeActor.getOrCreateNamespace(resourceId: resourceId, world: world)
+        let namespace = try await storeActor.getOrCreateNamespace(resourceId: resourceId, world: world, blockNumber: blockNumber)
         
         // Create Table if does not exist
         let table = try await storeActor.getOrCreateTable(resourceId: resourceId, namespace: namespace)

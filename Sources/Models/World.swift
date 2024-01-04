@@ -53,7 +53,7 @@ extension StoreActor {
         return world
     }
     
-    public func fetchLastSyncedBlock(worldAddress: EthereumAddress) throws -> UInt? {
+    public func fetchLastSyncedBlockForWorld(worldAddress: EthereumAddress) throws -> UInt? {
         let addressStr = worldAddress.hex(eip55: true)
         let lastBlockFetch = FetchDescriptor<World>(
             predicate: #Predicate { $0.worldAddress == addressStr }
